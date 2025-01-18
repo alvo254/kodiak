@@ -11,6 +11,8 @@ node_modules
 .terraform/
 .terraform.lock.hcl
 terraform.tfstate
+terraform.tfstate.lock.backup
+terraform.tfstate.backup
 
 # production
 /build
