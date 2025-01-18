@@ -31,3 +31,25 @@ resource "google_container_cluster" "kodiak_cluster" {
 }
 
 data "google_client_config" "default" {}
+
+resource "null_resource" "install_stuff" {
+  depends_on = [google_container_cluster.kodiak_cluster]
+
+  provisioner "local-exec" {
+    command = <<EOT
+    # Fetch the credentials for the GKE cluster
+    gcloud container clusters get-credentials kodiak-cluster --region us-central1-c
+
+    # Install ArgoCD using Helm
+    helm repo add argo https://argoproj.github.io/argo-helm
+    helm repo update
+    helm install argocd argo/argo-cd --namespace argocd \
+    --set server.service.type=LoadBalancer
+
+    # Install Kyverno using Helm
+    helm repo add kyverno https://kyverno.github.io/kyverno
+    helm repo update
+    helm install kyverno kyverno/kyverno --namespace kyverno --create-namespace
+    EOT
+  }
+}
