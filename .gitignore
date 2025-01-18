@@ -8,6 +8,9 @@ node_modules
 
 # testing
 /coverage
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
 
 # production
 /build
