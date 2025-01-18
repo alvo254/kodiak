@@ -1,0 +1,22 @@
+# this is an ordinary ArgoCD application file
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: car-app
+  namespace: argocd
+  labels:
+    example: basic
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/alvo254/furbar.git
+    targetRevision: HEAD
+    path: "pkg1/manifests"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: frontend
+  syncPolicy:
+    automated:
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

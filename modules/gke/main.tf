@@ -23,6 +23,7 @@ resource "google_container_cluster" "kodiak_cluster" {
 
   ip_allocation_policy {
     # use_ip_aliases = true
+    
   }
 
   enable_autopilot = false
