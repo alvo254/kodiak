@@ -1,7 +1,7 @@
 resource "google_container_cluster" "kodiak_cluster" {
   name               = "kodiak-cluster"
 #   location           = var.region
-  initial_node_count = 1
+  initial_node_count = 2
 
   network    = var.network1
   subnetwork = var.network2
@@ -39,13 +39,15 @@ resource "null_resource" "install_stuff" {
   provisioner "local-exec" {
     command = <<EOT
     # Fetch the credentials for the GKE cluster
+    gcloud config set project kodiak-448212
     gcloud container clusters get-credentials kodiak-cluster --region us-central1-c
 
     # Install ArgoCD using Helm
+    kubectl create ns argocd
     helm repo add argo https://argoproj.github.io/argo-helm
     helm repo update
     helm install argocd argo/argo-cd --namespace argocd \
-    --set server.service.type=LoadBalancer
+    --set server.service.type=LoadBalancer 
 
     # Install Kyverno using Helm
     helm repo add kyverno https://kyverno.github.io/kyverno

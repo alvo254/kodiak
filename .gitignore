@@ -13,7 +13,7 @@ node_modules
 terraform.tfstate
 terraform.tfstate.lock.backup
 terraform.tfstate.backup
-
+variables.tf
 # production
 /build
 
