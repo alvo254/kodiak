@@ -53,6 +53,22 @@ resource "null_resource" "install_stuff" {
     helm repo add kyverno https://kyverno.github.io/kyverno
     helm repo update
     helm install kyverno kyverno/kyverno --namespace kyverno --create-namespace
+
+    # Install Prometheus using Helm
+    kubectl create ns monitoring
+    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+    helm repo update
+    helm install prometheus prometheus-community/kube-prometheus-stack --namespace monitoring
+
+    # Install Grafana using Helm
+    kubectl create ns grafana
+    helm repo add grafana https://grafana.github.io/helm-charts
+    helm repo update
+    helm install grafana grafana/grafana --namespace grafana \
+    --set service.type=LoadBalancer
+
+    echo "Prometheus and Grafana installed. Access Grafana using the LoadBalancer IP and default admin credentials (admin/prometheus)."
+  
     EOT
   }
 }
