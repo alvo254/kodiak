@@ -1,22 +1,21 @@
-# this is an ordinary ArgoCD application file
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: car-app
-  namespace: argocd
+  name: new-car
+  namespace: argocd  # ArgoCD installs its resources in the `argocd` namespace
   labels:
     example: basic
 spec:
   project: default
   source:
-    repoURL: https://github.com/alvo254/furbar.git
-    targetRevision: HEAD
-    path: "pkg1/manifests"
+    repoURL: https://github.com/alvo254/kodi.git  # Replace with your repository URL
+    targetRevision: HEAD  # Branch, tag, or commit SHA
+    path: "package/manifests"  # Path to the manifests in the repository
   destination:
-    server: https://kubernetes.default.svc
-    namespace: frontend
+    server: https://kubernetes.default.svc  # In-cluster Kubernetes API server
+    namespace: frontend  # Namespace where the Deployment is deployed
   syncPolicy:
     automated:
-      selfHeal: true
+      selfHeal: true  # Automatically correct drift
     syncOptions:
-      - CreateNamespace=true
+      - CreateNamespace=true  # Create the namespace if it doesn't exist

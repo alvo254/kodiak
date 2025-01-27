@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: car-app
+  namespace: frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: car-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  template:
+    metadata:
+      labels:
+        app: car-app
+        # Add additional labels for better organization
+        tier: frontend
+        environment: production
+    spec:
+      # Add security context at pod level
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: car-app
+          image: alvin254/car-app:v1.0.0
+          # Add image pull policy
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+              name: http # Add port name for better readability
+          # Add resource limits and requests
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          # Add security context at container level
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 10"]
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http # Reference port by name
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5    # Add timeout
+            failureThreshold: 3  # Add failure threshold
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http # Reference port by name
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5    # Add timeout
+            failureThreshold: 3  # Add failure threshold
+          # Add environment variables
+          env:
+            - name: NODE_ENV
+              value: "production"
+          # Add volume mounts if needed
+          # volumeMounts:
+          #   - name: config
+          #     mountPath: /app/config
+      # Add tolerations if needed
+      # tolerations:
+      #   - key: "key"
+      #     operator: "Equal"
+      #     value: "value"
+      #     effect: "NoSchedule"
+      # Add affinity rules if needed
+      # affinity:
+      #   nodeAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #       nodeSelectorTerms:
+      #       - matchExpressions:
+      #         - key: kubernetes.io/e2e-az-name
+      #           operator: In
+      #           values:
+      #           - e2e-az1
+      #           - e2e-az2
