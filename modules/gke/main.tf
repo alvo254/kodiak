@@ -1,12 +1,15 @@
 resource "google_container_cluster" "kodiak_cluster" {
   name               = "kodiak-cluster"
-#   location           = var.region
+  location           = var.region
   initial_node_count = 2
 
-  network    = var.network1
-  subnetwork = var.network2
+  network    = var.network_id
+  subnetwork = var.subnetwork_name
 
-  datapath_provider = "ADVANCED_DATAPATH" # Enables Dataplane V2
+  ip_allocation_policy {
+    cluster_secondary_range_name  = var.pods_range_name
+    services_secondary_range_name = var.services_range_name
+  }
 
   node_config {
     machine_type = "e2-medium"
@@ -20,16 +23,9 @@ resource "google_container_cluster" "kodiak_cluster" {
       "https://www.googleapis.com/auth/trace.append",
     ]
   }
-
-  ip_allocation_policy {
-    # use_ip_aliases = true
-    
-  }
-
-  enable_autopilot = false
-
-#   node_locations = [var.region]
 }
+
+
 
 data "google_client_config" "default" {}
 
