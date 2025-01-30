@@ -14,6 +14,7 @@ terraform.tfstate
 terraform.tfstate.lock.backup
 terraform.tfstate.backup
 variables.tf
+.terraform.tfstate.lock.info
 # production
 /build
 
