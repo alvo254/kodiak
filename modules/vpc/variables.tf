@@ -1,31 +1,42 @@
 # variable "project_id" {
 #   description = "The GCP project ID"
 # }
-
 variable "ip_cidr_range" {
-  default = "10.0.0.0/16"
+  description = "The CIDR range for the VPC network"
+  default     = "172.16.0.0/16"
+}
+
+variable "subnet1_cidr_range" {
+  description = "The CIDR range for Subnet 1"
+  default     = "172.16.1.0/24"
+}
+
+variable "subnet2_cidr_range" {
+  description = "The CIDR range for Subnet 2"
+  default     = "172.16.2.0/24"
 }
 
 variable "pods_cidr_range" {
-  default = "10.1.0.0/16"
+  description = "The CIDR range for Pod IPs in subnet1"
+  default     = "10.0.0.0/14"
 }
 
 variable "services_cidr_range" {
-  default = "10.2.0.0/16"
-}
-
-variable "ip_cidr_range2" {
-  default = "10.3.0.0/16"
+  description = "The CIDR range for Service IPs in subnet1"
+  default     = "10.4.0.0/19"
 }
 
 variable "pods_cidr_range2" {
-  default = "10.4.0.0/16"
+  description = "The CIDR range for Pod IPs in subnet2"
+  default     = "10.8.0.0/14"  
 }
 
 variable "services_cidr_range2" {
-  default = "10.5.0.0/16"
+  description = "The CIDR range for Service IPs in subnet2"
+  default     = "10.12.0.0/19" 
 }
 
 variable "region" {
-  default = "us-central1"
+  description = "The region where resources will be created"
+  default     = "us-central1"
 }
