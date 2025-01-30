@@ -1,5 +1,10 @@
 # kodiak
 
+![Infra diagram](argo.png)
+![Infra diagram](grafana.png)
+![Infra diagram](frontend-app.png)
+
+
 ## Automated CI/CD Deployment with Kubernetes and GitOps
 
 ## Table of Contents
