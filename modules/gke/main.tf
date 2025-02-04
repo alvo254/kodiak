@@ -46,8 +46,11 @@ resource "null_resource" "install_stuff" {
     kubectl create ns argocd
     helm repo add argo https://argoproj.github.io/argo-helm
     helm repo update
-    helm install argocd argo/argo-cd --namespace argocd \
-    --set server.service.type=LoadBalancer 
+    helm install argocd argo/argo-cd \
+        --namespace argocd --create-namespace \
+        --version 7.8.0 \
+        --set server.service.type=LoadBalancer \
+        --set controller.image.tag=v2.14.0
 
     # Install Kyverno using Helm
     helm repo add kyverno https://kyverno.github.io/kyverno
