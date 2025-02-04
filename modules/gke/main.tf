@@ -69,7 +69,7 @@ resource "null_resource" "install_stuff" {
     # Cilium install 
     # helm install cilium cilium/cilium --namespace kube-system \
     #     --set hubble.enabled=true \
-    #     --set hubble.metrics.enabled="{dns,drop,tcp,flow,port-distribution,icmp,http}" \
+    #     --set hubble.metrics.enabled="{dns,drop,tcp,flow,port-distribution,icmp,httpV2:exemplars=true;labelsContext=source_ip\,source_namespace\,source_workload\,destination_ip\,destination_namespace\,destination_workload\,traffic_direction}" \
     #     --set hubble.relay.enabled=true \
     #     --set hubble.ui.enabled=true \
     #     --set hubble.peer.target="hubble-peer.kube-system.svc.cluster.local:4244" \
