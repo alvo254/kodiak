@@ -2,6 +2,7 @@
 
 ![Infra diagram](argo.png)
 ![Infra diagram](grafana.png)
+![Infra diagram](datadog.png)
 ![Infra diagram](frontend-app.png)
 
 

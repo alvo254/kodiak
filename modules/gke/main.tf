@@ -1,7 +1,7 @@
 resource "google_container_cluster" "kodiak_cluster" {
   name               = "kodiak-cluster"
   location           = var.region
-  initial_node_count = 2
+  initial_node_count = 4
 
   //Not working as expected
   datapath_provider = "ADVANCED_DATAPATH" # Enables Dataplane V2 cilium stuff :)
@@ -29,7 +29,6 @@ resource "google_container_cluster" "kodiak_cluster" {
 }
 
 
-
 data "google_client_config" "default" {}
 
 resource "null_resource" "install_stuff" {
@@ -38,7 +37,6 @@ resource "null_resource" "install_stuff" {
   provisioner "local-exec" {
     command = <<EOT
     # Fetch the credentials for the GKE cluster
-    # gcloud components install gke-gcloud-auth-plugin  //install this on your computer using curl or something
     gcloud config set project kodiak-448212
     gcloud container clusters get-credentials kodiak-cluster --region us-central1-c
 
@@ -64,21 +62,6 @@ resource "null_resource" "install_stuff" {
     helm install prometheus prometheus-community/kube-prometheus-stack --namespace monitoring \
       --set prometheus.service.type=LoadBalancer \
       --set prometheus.prometheusSpec.service.type=LoadBalancer
-    
-    //Dont uncomment still investigating use advance_datapath
-    # Cilium install 
-    # helm install cilium cilium/cilium --namespace kube-system \
-    #     --set hubble.enabled=true \
-    #     --set hubble.metrics.enabled="{dns,drop,tcp,flow,port-distribution,icmp,httpV2:exemplars=true;labelsContext=source_ip\,source_namespace\,source_workload\,destination_ip\,destination_namespace\,destination_workload\,traffic_direction}" \
-    #     --set hubble.relay.enabled=true \
-    #     --set hubble.ui.enabled=true \
-    #     --set hubble.peer.target="hubble-peer.kube-system.svc.cluster.local:4244" \
-    #     --set tetragon.export.pprof.enabled=true \
-    #     --set tetragon.export.hubble.enabled=true \
-    #     --set tetragon.resources.requests.cpu=100m \
-    #     --set tetragon.resources.requests.memory=100Mi \
-    #     --set tetragon.resources.limits.cpu=500m \
-    #     --set tetragon.resources.limits.memory=500Mi \
 
     # Install Grafana using Helm
     kubectl create ns grafana
@@ -87,8 +70,37 @@ resource "null_resource" "install_stuff" {
     helm install grafana grafana/grafana --namespace grafana \
     --set service.type=LoadBalancer
 
-    echo "Prometheus and Grafana installed. Access Grafana using the LoadBalancer IP and default admin credentials (admin/prometheus)."
-  
+    # Install NGINX Ingress Controller using Helm
+    kubectl create ns ingress-nginx
+    helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+    helm repo update
+    helm install nginx-ingress ingress-nginx/ingress-nginx --namespace ingress-nginx --create-namespace \
+        --set controller.service.type=LoadBalancer
+
+    # create a datadog secret (I did this outside since I dont want to expose my datadog api or hide the variables.tf) //<YOUR_DATADOG_API_KEY>
+    kubectl create secret generic datadog-secret --namespace datadog --create-namespace \
+         --from-literal api-key=<YOUR_DATADOG_API_KEY>               
+
+
+    # Install Datadog Agent using Helm
+    kubectl create ns datadog
+    helm repo add datadog https://helm.datadoghq.com
+    helm repo update
+    helm install datadog-operator datadog/datadog-operator --namespace datadog --create-namespace 
+
+      //Dont use instead it will be applied on the gitops side
+        # --set datadog.apiKeyExistingSecret=datadog-secret \
+        # --set datadog.logs.enabled=true \
+        # --set datadog.service.type=LoadBalancer
+        # --set datadog.logs.containerCollectAll=true \
+        # --set datadog.logs.containerRuntime="docker" \
+        # --set datadog.apm.enabled=true \
+        # --set datadog.apm.portEnabled=true \
+        # --set datadog.kubeStateMetricsCore.enabled=true \
+        # --set datadog.clusterName=kodiak-cluster
+
+
+    echo "Prometheus, Grafana, NGINX Ingress Controller, and Datadog installed. Access services using their LoadBalancer IPs."
     EOT
   }
 }
